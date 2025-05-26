@@ -1,0 +1,28 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+virtual-env/
+
+# Environment variables
+.env
+
+# IDE/editor settings
+.vscode/
+*.swp
+
+# OS files
+.DS_Store
+
+# Build/test artifacts
+htmlcov/
+.coverage
+
+# SQLite DBs (if any)
+*.db
+*.sqlite3
+
+# Node.js
+node_modules/
