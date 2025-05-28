@@ -23,8 +23,8 @@ A multiplayer, real-time platform for users to join rooms, solve coding challeng
 ### 👤 User Authentication
 - [x] Signup page (`/signup`)
 - [x] Login page (`/login`)
-- [ ] POST-based form handling
-- [ ] Password hashing with `passlib`
+- [x] POST-based form handling
+- [x] Password hashing with `passlib`
 - [ ] Session-based login state
 - [ ] Auth-protected `/dashboard`
 
@@ -83,3 +83,16 @@ pip install -r requirements.txt
 
 # Run app
 uvicorn main:app --reload
+
+---
+
+### 🧱 One-Time Database Setup
+
+To create the initial database tables, run the `init_db.py` script:
+(Python doesn’t automatically treat the root of your project as an importable module path. 
+Setting `PYTHONPATH=.` tells Python to look in the current directory (i.e., project root) 
+when resolving imports like `from backend.models import User`.)
+```bash
+# From the project root
+PYTHONPATH=. python backend/init_db.py
+
