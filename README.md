@@ -78,11 +78,15 @@ A multiplayer, real-time platform for users to join rooms, solve coding challeng
 python -m venv virtual-env
 source virtual-env/bin/activate
 
+
 # Install dependencies
 pip install -r requirements.txt
 
-# Run app
-uvicorn main:app --reload
+# 🚀 Running the App (Development)
+## 1. Navigate to the project root:
+## 2. Start the FastAPI server with Uvicorn
+PYTHONPATH=. uvicorn backend.main:app --reload
+```
 
 ---
 
@@ -92,7 +96,8 @@ To create the initial database tables, run the `init_db.py` script:
 (Python doesn’t automatically treat the root of your project as an importable module path. 
 Setting `PYTHONPATH=.` tells Python to look in the current directory (i.e., project root) 
 when resolving imports like `from backend.models import User`.)
+
 ```bash
 # From the project root
 PYTHONPATH=. python backend/init_db.py
-
+```

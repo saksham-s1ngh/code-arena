@@ -13,14 +13,16 @@ from sqlalchemy.orm import Session
 from backend.db import SessionLocal
 from backend.models import User
 from passlib.hash import bcrypt
+from pathlib import Path
 
 # Instantiate app
 app = FastAPI()
 
-# mounting static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# this statement will help resolve absolute path to project root
+BASE_DIR = Path(__file__).resolve().parent.parent 
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 def get_db():
     db = SessionLocal() # 1. creating a new DB session (connecting to our DB)
@@ -56,3 +58,22 @@ async def signup_user(request: Request, username: Annotated[str, Form()], email:
         db.add(user)
         db.commit()
         return templates.TemplateResponse("signup_success.html", {"request": request})
+    
+@app.post("/login")
+def login_user(request: Request, username: Annotated[str, Form()], password: Annotated[str, Form()], db: Session = Depends(get_db)):
+    stmt = select(User).where(User.username == username)
+    result = db.execute(stmt) # cursor object that hasn't been unpacked
+    user = result.scalar_one_or_none()
+    if user:
+        hashed_password = bcrypt.hash(password)
+        pass_check = bcrypt.verify(hashed_password, user.password)
+        if pass_check:
+            return templates.TemplateResponse("dashboard.html", {"request": request})
+        else:
+            # have an error message displayed on the login page with "Incorrect password!" message
+            return templates.TemplateResponse("login.html", {
+                "request": request,
+                "error": "Incorrect password!"
+                }) # from here, we can access {{ error }} through Jinja
+    else:
+        raise ValueError(f"No account found for {username}!")
