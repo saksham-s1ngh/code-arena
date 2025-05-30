@@ -1,9 +1,8 @@
 #FASTAPI imports
-from fastapi import FastAPI, Request, Header, Form, Depends
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, Request, Form, Depends, Response
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.encoders import jsonable_encoder
 
 #Other imports
 from uuid import uuid4
@@ -15,6 +14,9 @@ from backend.models import User
 from passlib.hash import bcrypt
 from pathlib import Path
 
+# within project imports
+from backend.auth.dependencies import get_db, get_current_user
+
 # Instantiate app
 app = FastAPI()
 
@@ -23,13 +25,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
-
-def get_db():
-    db = SessionLocal() # 1. creating a new DB session (connecting to our DB)
-    try:
-        yield db # 2. We'll pass it to the route function (like a return, but context(database lifecycle) stays open)
-    finally:
-        db.close() # 3. After request completion, close the session (cleanup) 
 
 # Handle GET request to root
 @app.get("/")
@@ -60,7 +55,7 @@ async def signup_user(request: Request, username: Annotated[str, Form()], email:
         return templates.TemplateResponse("signup_success.html", {"request": request})
     
 @app.post("/login")
-def login_user(request: Request, username: Annotated[str, Form()], password: Annotated[str, Form()], db: Session = Depends(get_db)):
+def login_user(request: Request, response: Response ,username: Annotated[str, Form()], password: Annotated[str, Form()], db: Session = Depends(get_db)):
     stmt = select(User).where(User.username == username)
     result = db.execute(stmt) # cursor object that hasn't been unpacked
     user = result.scalar_one_or_none()
@@ -68,6 +63,8 @@ def login_user(request: Request, username: Annotated[str, Form()], password: Ann
         hashed_password = bcrypt.hash(password)
         pass_check = bcrypt.verify(hashed_password, user.password)
         if pass_check:
+            # TODO - currently using user.id as session value. Randomize or hash this!
+            response.set_cookie(key="session_id", value=str(user.id), httponly=True) 
             return templates.TemplateResponse("dashboard.html", {"request": request})
         else:
             # have an error message displayed on the login page with "Incorrect password!" message
@@ -77,3 +74,10 @@ def login_user(request: Request, username: Annotated[str, Form()], password: Ann
                 }) # from here, we can access {{ error }} through Jinja
     else:
         raise ValueError(f"No account found for {username}!")
+    
+@app.get("/dashboard")
+def get_dashboard(request: Request, user: User = Depends(get_current_user)):
+    # session_id = request.cookies.get("session_id")
+    # if session_id is None:
+    #     return RedirectResponse("/login")
+    return templates.TemplateResponse("dashboard.html", {"request": request, "user": user})
