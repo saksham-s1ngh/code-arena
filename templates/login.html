@@ -4,12 +4,12 @@
 
 {% block content %}
     {% if error %}
-    <p class="error">{{ error }}</p>
+    <div class="error">{{ error }}</div>
     {% endif %}
     <form action="/login" method="post">
         <p>
             <label for="username">Username:</label>
-            <input type="text" id="username" name="user_name" />
+            <input type="text" id="username" name="username" value="{{ username | default('') }}" />
         </p>
         <p>
             <label for="password">Password:</label>

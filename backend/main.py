@@ -46,7 +46,11 @@ async def signup_user(request: Request, username: Annotated[str, Form()], email:
     result = db.execute(stmt)
     user = result.scalar_one_or_none()
     if user:
-        raise ValueError("User already exists.")
+        return templates.TemplateResponse("signup.html", {
+            "request": request,
+            "error": f"User with username \'{username}\' already exists.",
+            "username": username
+        })
     else: 
         hashed_password = bcrypt.hash(password)
         user = User(username = username, email = email, password = hashed_password)
@@ -60,8 +64,7 @@ def login_user(request: Request, response: Response ,username: Annotated[str, Fo
     result = db.execute(stmt) # cursor object that hasn't been unpacked
     user = result.scalar_one_or_none()
     if user:
-        hashed_password = bcrypt.hash(password)
-        pass_check = bcrypt.verify(hashed_password, user.password)
+        pass_check = bcrypt.verify(password, user.password)
         if pass_check:
             # TODO - currently using user.id as session value. Randomize or hash this!
             response.set_cookie(key="session_id", value=str(user.id), httponly=True) 
@@ -70,10 +73,15 @@ def login_user(request: Request, response: Response ,username: Annotated[str, Fo
             # have an error message displayed on the login page with "Incorrect password!" message
             return templates.TemplateResponse("login.html", {
                 "request": request,
-                "error": "Incorrect password!"
+                "error": "Incorrect password!",
+                "username": username
                 }) # from here, we can access {{ error }} through Jinja
     else:
-        raise ValueError(f"No account found for {username}!")
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "error": f"No account found for {username}",
+            "username": username
+        })
     
 @app.get("/dashboard")
 def get_dashboard(request: Request, user: User = Depends(get_current_user)):

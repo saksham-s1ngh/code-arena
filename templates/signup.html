@@ -3,10 +3,13 @@
 {% block title %} Signup page {% endblock %}
 
 {% block content %}
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
     <form action="/signup" method="post">
         <p>
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" />
+            <input type="text" id="username" name="username" value="{{ username | default('') }}"/>
         </p>
         <p>
             <label for="email">Email address:</label>

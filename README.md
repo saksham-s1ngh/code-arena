@@ -25,8 +25,8 @@ A multiplayer, real-time platform for users to join rooms, solve coding challeng
 - [x] Login page (`/login`)
 - [x] POST-based form handling
 - [x] Password hashing with `passlib`
-- [ ] Session-based login state
-- [ ] Auth-protected `/dashboard`
+- [x] Session-based login state
+- [x] Auth-protected `/dashboard`
 
 ### 🏟 Room Management
 - [ ] Create/join room routes
