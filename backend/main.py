@@ -81,3 +81,9 @@ def get_dashboard(request: Request, user: User = Depends(get_current_user)):
     # if session_id is None:
     #     return RedirectResponse("/login")
     return templates.TemplateResponse("dashboard.html", {"request": request, "user": user})
+
+@app.get("/logout")
+def get_logout(response: Response):
+    response = RedirectResponse(url="/login", status_code=302)
+    response.delete_cookie("session_id")
+    return response
