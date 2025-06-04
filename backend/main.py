@@ -16,6 +16,8 @@ from pathlib import Path
 
 # within project imports
 from backend.auth.dependencies import get_db, get_current_user
+from backend.core.room_manager import room_manager
+
 
 # Instantiate app
 app = FastAPI()
@@ -29,7 +31,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 # Handle GET request to root
 @app.get("/")
 def read_home(request: Request):
-    return templates.TemplateResponse("base.html", {"request": request})
+    return templates.TemplateResponse("home.html", {"request": request})
 
 @app.get("/login")
 def show_login_form(request: Request):

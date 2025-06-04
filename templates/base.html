@@ -9,22 +9,28 @@
     {% endblock %}
 </head>
 <body>
-    <div id="navbar">
-        {% block navbar %}
+    <header>
         <nav>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
             {% if user %}
-            <a href="/logout">Logout</a>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/logout">Logout</a></li>
             {% else %}
-            <a href="/login">Login</a>
-            <a href="/signup">Sign Up</a>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/signup">Sign Up</a></li>
             {% endif %}
+            </ul>
         </nav>
-        {% endblock %}
-    </div>
+    </header>
+
+    <main>
     <div id="content">{% block content %}{% endblock %}</div>
+    </main>
+    
     <div id="footer">
         {% block footer %}
-        Copyright 2025 by XYZ.
+        <p>&copy; CodeArena 2025</p>
         {% endblock %}
     </div>
 </body>
