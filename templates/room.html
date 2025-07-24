@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Room {{ room_id }}{% endblock %}
+
+{% block content %}
+    <h2>Room ID: {{ room_id }}</h2>
+    <p><strong>Host:</strong> {{ room.host }}</p>
+    <p><strong>Question:</strong> <a href="{{ room.question_url }}" target="_blank">{{ room.question_url }}</a></p>
+    <p><strong>Participants:</strong></p>
+{% endblock %}

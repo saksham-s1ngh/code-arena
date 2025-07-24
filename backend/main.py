@@ -70,7 +70,10 @@ def login_user(request: Request, response: Response ,username: Annotated[str, Fo
         if pass_check:
             # TODO - currently using user.id as session value. Randomize or hash this!
             response.set_cookie(key="session_id", value=str(user.id), httponly=True) 
-            return templates.TemplateResponse("dashboard.html", {"request": request})
+            return templates.TemplateResponse("dashboard.html", {
+                "request": request,
+                "user": user
+                })
         else:
             # have an error message displayed on the login page with "Incorrect password!" message
             return templates.TemplateResponse("login.html", {
@@ -97,3 +100,24 @@ def get_logout(response: Response):
     response = RedirectResponse(url="/login", status_code=302)
     response.delete_cookie("session_id")
     return response
+
+@app.post("/create-room")
+def create_room(request: Request, question_url: Annotated[str, Form()], user: User = Depends(get_current_user)):
+    room_id = room_manager.create_room(user, question_url)
+    return RedirectResponse(url=f"/room/{room_id}", status_code=303)
+
+@app.get("/room/{room_id}")
+def room_page(request: Request, room_id: str, user: User = Depends(get_current_user)):
+    room = room_manager.get_room(room_id)
+    if not room:
+        return templates.TemplateResponse("404.html", {"request": request})
+    return templates.TemplateResponse("room.html", {
+        "request": request, 
+        "room": room, 
+        "room_id": room_id,
+        "user": user
+        })
+
+@app.get("/room")
+def redirect_to_room(room_id: str):
+    return RedirectResponse(url=f"/room/{room_id}", status_code=303)

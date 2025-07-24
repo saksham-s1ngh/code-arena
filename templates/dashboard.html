@@ -3,6 +3,23 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <p>Login successful!</p>
     <h2>Welcome {{ user.username }},to the dashboard page!</h2>
+
+    <section>
+        <h3>Create a New Room</h3>
+        <form action="/create-room" method="post">
+            <label for="question_url">Question URL:</label>
+            <input type="url" id="question_url" name="question_url" placeholder="https://leetcode.com/problems/..." required>
+            <button type="submit">Create Room</button>
+        </form>
+    </section>
+
+    <section>
+        <h3>Join a room</h3>
+        <form method="get" action="/room">
+            <label for="room_id">Room ID:</label>
+            <input type="text" id="room_id" name="room_id" required>
+            <button type="submit">Join Room</button>
+        </form>
+    </section>
 {% endblock %}
