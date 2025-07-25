@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from uuid import uuid4
 from typing import Annotated, Union
 from sqlalchemy import select, insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from backend.db import SessionLocal
 from backend.models import User
@@ -42,8 +43,15 @@ def show_signup_form(request: Request):
     return templates.TemplateResponse("signup.html", {"request": request})
 
 @app.post("/signup")
-async def signup_user(request: Request, username: Annotated[str, Form()], email: Annotated[str, Form()], password: Annotated[str, Form()], db: Session = Depends(get_db)):
+async def signup_user(
+    request: Request, 
+    username: Annotated[str, Form()], 
+    email: Annotated[str, Form()], 
+    password: Annotated[str, Form()], 
+    db: Session = Depends(get_db)
+    ):
 
+    # Check username
     stmt = select(User).where(User.username == username)
     result = db.execute(stmt)
     user = result.scalar_one_or_none()
@@ -53,12 +61,31 @@ async def signup_user(request: Request, username: Annotated[str, Form()], email:
             "error": f"User with username \'{username}\' already exists.",
             "username": username
         })
-    else: 
-        hashed_password = bcrypt.hash(password)
-        user = User(username = username, email = email, password = hashed_password)
-        db.add(user)
+    
+    # Check email
+    stmt = select(User).where(User.email == email)
+    if db.execute(stmt).scalar_one_or_none():
+        return templates.TemplateResponse("signup.html", {
+            "request": request,
+            "error": f"An account with '{email}' already exists.",
+            "username": username,
+            "email": email
+        })
+
+    hashed_password = bcrypt.hash(password)
+    new_user = User(username = username, email = email, password = hashed_password)
+    db.add(new_user)
+    try :
         db.commit()
-        return templates.TemplateResponse("signup_success.html", {"request": request})
+    except IntegrityError:
+        db.rollback()
+        return templates.TemplateResponse("signup.html", {
+            "request": request,
+            "error": "That username or email is already registered.", 
+            "username": username,
+            "email": email
+        })
+    return templates.TemplateResponse("signup_success.html", {"request": request})
     
 @app.post("/login")
 def login_user(request: Request, response: Response ,username: Annotated[str, Form()], password: Annotated[str, Form()], db: Session = Depends(get_db)):
