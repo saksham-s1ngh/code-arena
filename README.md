@@ -1,5 +1,7 @@
 # CodeArena – Real-Time Coding Battle Platform
 
+## Migrating this project to Javascript (realised a better implementation could be done with JS)
+
 A multiplayer, real-time platform for users to join rooms, solve coding challenges collaboratively or competitively, and level up through head-to-head matches.
 
 ## 🌐 Project Goals
